@@ -1,0 +1,101 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'ro.isdc.wro4j.gradle:wro4j-gradle-plugin:1.8.0.Beta4'
+    }
+}
+
+plugins {
+    id "org.springframework.boot" version "2.1.9.RELEASE"
+    id "io.spring.dependency-management" version "1.0.8.RELEASE"
+    id 'jacoco'
+    id "com.gorylenko.gradle-git-properties" version "2.2.0"
+    id "java"
+}
+
+apply plugin: 'wro4j'
+
+group = "org.springframework.samples"
+version = "2.1.0.BUILD-SNAPSHOT"
+sourceCompatibility = "1.8"
+
+repositories {
+    mavenCentral()
+    maven {
+        name "Spring Snapshot"
+        url "https://repo.spring.io/snapshot"
+        mavenContent {
+            snapshotsOnly()
+        }
+    }
+    maven {
+        name "Spring Milestones"
+        url "https://repo.spring.io/milestone"
+        mavenContent {
+            releasesOnly()
+        }
+    }
+}
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+
+springBoot {
+    // Spring Boot Actuator displays build-related information
+    // if a META-INF/build-info.properties file is present
+    buildInfo()
+}
+
+gitProperties {
+    dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+    gitPropertiesName = "git.properties"
+    failOnNoGitDirectory = false
+}
+
+ext {
+    webjarsBootstrapVersion = "3.3.6"
+    webjarsJqueryUiVersion = "1.11.4"
+    webjarsJqueryVersion = "2.2.4"
+    jacocoVersion = "0.8.2"
+}
+
+webResources {
+    bundle("petclinic"){
+        css "webjars/bootstrap/${webjarsBootstrapVersion}/less/bootstrap.less"
+        css "less/petclinic.less"
+        preProcessor "less4j", "lessCssImport"
+        cssRewriteUrl()
+    }
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-cache"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
+
+    // Databases - Uses HSQL by default
+    runtimeOnly "org.hsqldb:hsqldb"
+    runtimeOnly "mysql:mysql-connector-java"
+
+    // Caching
+    implementation "javax.cache:cache-api"
+    implementation "org.ehcache:ehcache"
+
+    // Webjars
+    implementation "org.webjars:webjars-locator-core"
+    implementation "org.webjars:jquery:${webjarsJqueryVersion}"
+    implementation "org.webjars:jquery-ui:${webjarsJqueryUiVersion}"
+    webjars "org.webjars:bootstrap:${webjarsBootstrapVersion}"
+
+    developmentOnly "org.springframework.boot:spring-boot-devtools"
+
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+}
